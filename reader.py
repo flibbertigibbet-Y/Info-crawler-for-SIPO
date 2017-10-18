@@ -9,7 +9,6 @@ from bs4 import BeautifulSoup
 reload(sys)
 sys.setdefaultencoding('utf-8')
 
-
 # basic parameters of information
 fileName = raw_input("Please enter the file name which you wanna store your data:")
 while fileName is None:
@@ -19,9 +18,13 @@ itemNumber = raw_input("Please enter the total number of items: ")
 while itemNumber is None:
     itemNumber = raw_input("Please enter the total number of items: ")
 
-url = raw_input("Please copy the url from the top of you browser and put it here:")
-while url is None:
-    url = raw_input("Please copy the url from the top of you browser and put it here:")
+# url = raw_input("Please copy the url from the top of you browser and put it here:")
+# while url is None:
+#     url = raw_input("Please copy the url from the top of you browser and put it here:")
+
+aName = raw_input("Please input the applicant's name: ")
+while aName is None:
+    aName = raw_input("Please input the applicant's name: ")
 
 # Create a workbook and add a worksheet.
 workbook = xlsxwriter.Workbook("./Desktop/" + fileName + ".xlsx")
@@ -29,6 +32,7 @@ worksheet = workbook.add_worksheet()
 
 # basic configurations
 detailsPageUrl = 'http://cpquery.sipo.gov.cn/txnQueryBibliographicData.do?select-key:gonggaobj=1&select-key:backPage=http%3A%2F%2Fcpquery.sipo.gov.cn%2FtxnQueryOrdinaryPatents.do%3Fselect-key%3Ashenqingh%3D%26select-key%3Azhuanlimc%3D%26select-key%3Ashenqingrxm%3D%25E5%258F%25B0%25E5%25B7%259E%25E9%25A3%259E%25E8%25B7%2583%25E5%258F%258C%25E6%2598%259F%25E6%2588%2590%25E8%25A1%25A3%25E6%259C%25BA%25E6%25A2%25B0%25E6%259C%2589%25E9%2599%2590%25E5%2585%25AC%25E5%258F%25B8%26select-key%3Azhuanlilx%3D%26select-key%3Ashenqingr_from%3D%26select-key%3Ashenqingr_to%3D%26verycode%3D10%26inner-flag%3Aopen-type%3Dwindow%26inner-flag%3Aflowno%3D1508094648248&inner-flag:open-type=window&inner-flag:flowno=1508094657495&select-key:shenqingh='
+searchUrl = 'http://cpquery.sipo.gov.cn//txnQueryOrdinaryPatents.do?select-key%3Ashenqingh=&select-key%3Azhuanlimc=&select-key%3Azhuanlilx=&select-key%3Ashenqingr_from=&select-key%3Ashenqingr_to=&very-code=&captchaNo=&fanyeflag=1&verycode=fanye'
 
 
 # http://cpquery.sipo.gov.cn//txnQueryOrdinaryPatents.do?select-key%3Ashenqingh=&select-key%3Azhuanlimc=&select-key%3Ashenqingrxm=%E5%8F%B0%E5%B7%9E%E9%A3%9E%E8%B7%83%E5%8F%8C%E6%98%9F%E6%88%90%E8%A1%A3%E6%9C%BA%E6%A2%B0%E6%9C%89%E9%99%90%E5%85%AC%E5%8F%B8&select-key%3Azhuanlilx=&select-key%3Ashenqingr_from=&select-key%3Ashenqingr_to=&very-code=&captchaNo=&fanyeflag=1&verycode=fanye&attribute-node:record_start-row=1&attribute-node:record_page-row=10&#anchor
@@ -46,9 +50,12 @@ def decrypt(key):
 
 
 # change the url input in order to get the item from the very begining
-def changeUrl(url, itemNumber):
+def changeUrl(searchUrl,itemNumber,aName):
     # get all items on the first page
-    url = url[0: url.index('record_page-row')] + 'record_page-row=' + itemNumber
+    # if url.find('record_page-row') > -1:
+    #     url = url[0: url.index('record_page-row')] + 'record_page-row=' + itemNumber
+    # else:
+    url = searchUrl + '&attribute-node:record_start-row=1&attribute-node:record_page-row='+itemNumber+'&select-key%3Ashenqingrxm='+aName+'#anchor';
     return url
 
 
@@ -152,7 +159,8 @@ def wirteToExcel(result):
     workbook.close()
 
 
-newUlr = changeUrl(url, itemNumber)
+newUlr = changeUrl(searchUrl, itemNumber, aName)
+print newUlr
 wholePage = requestWholePage(newUlr)
 patentNumbers = getPatentNumberForEachPage(wholePage)
 result = list(map(lambda number: getDetailsOfPatent(number), patentNumbers))
@@ -161,3 +169,6 @@ if result is not None or len(result) > 0:
 else:
     print "Nothing has been found"
 print "Finished"
+
+
+# http://cpquery.sipo.gov.cn//txnQueryOrdinaryPatents.do?select-key%3Ashenqingh=&select-key%3Azhuanlimc=&select-key%3Ashenqingrxm=%E5%8F%B0%E5%B7%9E%E9%A3%9E%E8%B7%83%E5%8F%8C%E6%98%9F%E6%88%90%E8%A1%A3%E6%9C%BA%E6%A2%B0%E6%9C%89%E9%99%90%E5%85%AC%E5%8F%B8&select-key%3Azhuanlilx=&select-key%3Ashenqingr_from=&select-key%3Ashenqingr_to=&very-code=&captchaNo=&fanyeflag=1&verycode=fanye&attribute-node:record_start-row=11&attribute-node:record_page-row=10&#anchor
